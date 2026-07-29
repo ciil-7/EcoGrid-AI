@@ -7,16 +7,37 @@ from model import train_energy_model
 st.set_page_config(page_title="EcoGrid-AI Dashboard", page_icon="⚡", layout="wide")
 
 st.title("⚡ EcoGrid-AI: Industrial Carbon Footprint & Energy Grid Balancer")
-st.markdown("لوحة تحكم ذكية ومتقدمة لرصد استهلاك الطاقة، تحليل انبعاثات الكربون، وتقييم دقة نماذج الذكاء الاصطناعي.")
+st.markdown("لوحة تحكم ذكية ومتقدمة لرصد استهلاك الطاقة، تحليل انبعاثات الكربون، وتقديم توصيات استباقية للذكاء الاصطناعي.")
 
 # زر تشغيل التحليل
-if st.button("تشغيل التحليل ونموذج الذكاء الاصطناعي"):
-    # استقبال النموذج ومقاييس الدقة المستخرجة
+if st.button("تشغيل التحليل والتوصيات الذكية"):
     model, mae, rmse, r2 = train_energy_model()
     
     try:
         df = pd.read_csv("real_energy_data.csv")
-        st.success("تم تشغيل نموذج الذكاء الاصطناعي وتحليل البيانات بنجاح!")
+        st.success("تم تشغيل النظام وتحليل البيانات وتقديم التوصيات بنجاح!")
+        
+        # --- قسم التوصيات الذكية (AI Recommendations) ---
+        st.subheader("💡 التوصيات الذكية والإجراءات الاستباقية (AI Recommendations)")
+        
+        # إيجاد ساعة الذروة (أعلى استهلاك للطاقة)
+        peak_row = df.loc[df['energy_consumption_mw'].idxmax()]
+        peak_time = str(peak_row['timestamp'])
+        peak_energy = peak_row['energy_consumption_mw']
+        
+        # حساب نسبة توفير مقترحة للطاقة الشمسية بناءً على كفاءة النظام
+        avg_efficiency = df['efficiency_score'].mean()
+        solar_reduction_pct = round(max(15.0, 100 - avg_efficiency + 10), 1)
+        
+        rec_col1, rec_col2 = st.columns(2)
+        
+        with rec_col1:
+            st.warning(f"⚠️ **تنبيه الأحمال العالية:** \n\n يوصى بـ **تقليل الحمل في الساعة {peak_time}** حيث بلغ استهلاك الطاقة قمة بواقع **{peak_energy} MW** لتجنب الضغط على الشبكة.")
+            
+        with rec_col2:
+            st.success(f"☀️ **فرصة الاستدامة البديلة:** \n\n الاعتماد جزئياً على **الطاقة الشمسية قد تقلل الانبعاثات بنسبة {solar_reduction_pct}%** وتحسن مؤشر الكفاءة العامة للمصنع.")
+            
+        st.markdown("---")
         
         # --- قسم مقاييس دقة نموذج الذكاء الاصطناعي (Model Metrics) ---
         st.subheader("🎯 مقاييس دقة نموذج الذكاء الاصطناعي (Model Evaluation Metrics)")
@@ -33,7 +54,6 @@ if st.button("تشغيل التحليل ونموذج الذكاء الاصطنا
         
         # --- المؤشرات الحيوية للمصنع (KPIs) ---
         total_emissions = df['carbon_emission_tons'].sum()
-        avg_efficiency = df['efficiency_score'].mean()
         expected_reduction = round((100 - avg_efficiency) * 1.5, 2)
         
         st.subheader("📊 المؤشرات الرئيسية لأداء الطاقة (KPIs)")
@@ -94,4 +114,4 @@ if st.button("تشغيل التحليل ونموذج الذكاء الاصطنا
 
 # الشريط الجانبي
 st.sidebar.header("عن النظام")
-st.sidebar.info("مشروع صناعي ذكي متكامل يدمج تعلم الآلة وتحليل البيانات لخدمة قطاع الطاقة.")
+st.sidebar.info("مشروع صناعي ذكي متكامل يدمج التوصيات الاستباقية وتعلم الآلة لخدمة قطاع الطاقة.")
