@@ -7,23 +7,35 @@ from model import train_energy_model
 st.set_page_config(page_title="EcoGrid-AI Dashboard", page_icon="⚡", layout="wide")
 
 st.title("⚡ EcoGrid-AI: Industrial Carbon Footprint & Energy Grid Balancer")
-st.markdown("لوحة تحكم ذكية ومتقدمة لرصد استهلاك الطاقة، تحليل انبعاثات الكربون، ومؤشرات الاستدامة الصناعية عبر رسوم تفاعلية متقدمة.")
+st.markdown("لوحة تحكم ذكية ومتقدمة لرصد استهلاك الطاقة، تحليل انبعاثات الكربون، وتقييم دقة نماذج الذكاء الاصطناعي.")
 
 # زر تشغيل التحليل
-if st.button("تشغيل التحليل وتحديث اللوحة التفاعلية"):
-    model = train_energy_model()
+if st.button("تشغيل التحليل ونموذج الذكاء الاصطناعي"):
+    # استقبال النموذج ومقاييس الدقة المستخرجة
+    model, mae, rmse, r2 = train_energy_model()
     
     try:
-        # قراءة البيانات الحقيقية
         df = pd.read_csv("real_energy_data.csv")
-        st.success("تم تحليل البيانات بنجاح وعرض لوحة المؤشرات التفاعلية!")
+        st.success("تم تشغيل نموذج الذكاء الاصطناعي وتحليل البيانات بنجاح!")
         
-        # --- حساب المؤشرات الحيوية (KPIs) ---
+        # --- قسم مقاييس دقة نموذج الذكاء الاصطناعي (Model Metrics) ---
+        st.subheader("🎯 مقاييس دقة نموذج الذكاء الاصطناعي (Model Evaluation Metrics)")
+        metric_col1, metric_col2, metric_col3 = st.columns(3)
+        
+        with metric_col1:
+            st.metric(label="معامل التحديد ($R^2 Score$)", value=f"{r2:.2f}", delta="جودة مطابقة النموذج")
+        with metric_col2:
+            st.metric(label="جذر متوسط مربع الخطأ ($RMSE$)", value=f"{rmse:.2f} طن", delta="دقة التنبؤات", delta_color="inverse")
+        with metric_col3:
+            st.metric(label="متوسط الخطأ المطلق ($MAE$)", value=f"{mae:.2f} طن", delta="معدل الانحراف", delta_color="inverse")
+            
+        st.markdown("---")
+        
+        # --- المؤشرات الحيوية للمصنع (KPIs) ---
         total_emissions = df['carbon_emission_tons'].sum()
         avg_efficiency = df['efficiency_score'].mean()
         expected_reduction = round((100 - avg_efficiency) * 1.5, 2)
         
-        # --- عرض المؤشرات في أعمدة متجاورة ---
         st.subheader("📊 المؤشرات الرئيسية لأداء الطاقة (KPIs)")
         col1, col2, col3 = st.columns(3)
         
@@ -36,13 +48,11 @@ if st.button("تشغيل التحليل وتحديث اللوحة التفاعل
         
         st.markdown("---")
         
-        # --- رسوم بيانية متقدمة باستخدام Plotly ---
+        # --- رسوم Plotly التفاعلية ---
         st.subheader("📈 التحليلات البصرية المتقدمة (Plotly)")
-        
         col_chart1, col_chart2 = st.columns(2)
         
         with col_chart1:
-            # رسم بياني تفاعلي يوضح العلاقة بين استهلاك الطاقة والانبعاثات وكفاءة النظام
             fig_scatter = px.scatter(
                 df, 
                 x="energy_consumption_mw", 
@@ -56,7 +66,6 @@ if st.button("تشغيل التحليل وتحديث اللوحة التفاعل
             st.plotly_chart(fig_scatter, use_container_width=True)
             
         with col_chart2:
-            # رسم بياني شريطي (Bar Chart) لتطور كفاءة الطاقة مع الزمن
             fig_bar = px.bar(
                 df, 
                 x="timestamp", 
@@ -68,7 +77,6 @@ if st.button("تشغيل التحليل وتحديث اللوحة التفاعل
             )
             st.plotly_chart(fig_bar, use_container_width=True)
             
-        # رسم خطي تفاعلي شامل لكل المتغيرات
         fig_line = px.line(
             df, 
             x="timestamp", 
@@ -78,7 +86,6 @@ if st.button("تشغيل التحليل وتحديث اللوحة التفاعل
         )
         st.plotly_chart(fig_line, use_container_width=True)
         
-        # عرض جدول البيانات في تفاصيل قابلة للطي
         with st.expander("📁 استعراض جدول البيانات الخام للمصنع"):
             st.dataframe(df, use_container_width=True)
         
@@ -87,4 +94,4 @@ if st.button("تشغيل التحليل وتحديث اللوحة التفاعل
 
 # الشريط الجانبي
 st.sidebar.header("عن النظام")
-st.sidebar.info("مشروع صناعي ذكي مدعوم بمكتبات Plotly و Streamlit لتعزيز أهداف الاستدامة.") 
+st.sidebar.info("مشروع صناعي ذكي متكامل يدمج تعلم الآلة وتحليل البيانات لخدمة قطاع الطاقة.")
